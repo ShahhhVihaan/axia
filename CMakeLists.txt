@@ -40,4 +40,4 @@ include_directories("${MUJOCO_INCLUDE_DIR}")
 link_directories("${MUJOCO_LIB_DIR}")
 
 add_executable(main src/main.cpp)
-target_link_libraries(main mujoco pthread m dl)
+target_link_libraries(main mujoco glfw pthread m dl)
