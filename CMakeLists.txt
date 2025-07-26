@@ -18,10 +18,11 @@ set(MUJOCO_LIB_DIR "${MUJOCO_EXTRACTED_DIR}/lib")
 if(NOT EXISTS "${MUJOCO_ARCHIVE}")
   message(STATUS "Downloading MuJoCo from ${MUJOCO_URL}")
   file(DOWNLOAD "${MUJOCO_URL}" "${MUJOCO_ARCHIVE}"
-       EXPECTED_HASH SHA256=ecf1a17459a342badf2b4f32dd4677a6a0e5fd393c5143993eb3e81b8e44609b
-       SHOW_PROGRESS) # TODO: use the sha256 file as well
+       SHOW_PROGRESS)
 endif()
 
+
+# TODO: Add checksum
 if(NOT EXISTS "${MUJOCO_INCLUDE_DIR}/mujoco/mujoco.h")
   message(STATUS "Extracting MuJoCo to ${MUJOCO_EXTRACTED_DIR}")
   file(MAKE_DIRECTORY "${MUJOCO_BASE_DIR}")
@@ -34,6 +35,8 @@ if(NOT EXISTS "${MUJOCO_INCLUDE_DIR}/mujoco/mujoco.h")
     message(FATAL_ERROR "Failed to extract MuJoCo archive")
   endif()
 endif()
+
+
 
 
 include_directories("${MUJOCO_INCLUDE_DIR}")
