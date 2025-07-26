@@ -18,7 +18,7 @@ set(MUJOCO_LIB_DIR "${MUJOCO_EXTRACTED_DIR}/lib")
 if(NOT EXISTS "${MUJOCO_ARCHIVE}")
   message(STATUS "Downloading MuJoCo from ${MUJOCO_URL}")
   file(DOWNLOAD "${MUJOCO_URL}" "${MUJOCO_ARCHIVE}"
-       SHOW_PROGRESS)
+    SHOW_PROGRESS)
 endif()
 
 
@@ -42,13 +42,14 @@ set(MENAGERIE_URL "https://github.com/deepmind/mujoco_menagerie/archive/refs/hea
 set(MENAGERIE_ARCHIVE "${CMAKE_BINARY_DIR}/menagerie.zip")
 set(MENAGERIE_DIR "${CMAKE_BINARY_DIR}/menagerie")
 
+# TODO: version check - commit hash
 if(NOT EXISTS "${MENAGERIE_ARCHIVE}")
   message(STATUS "Downloading MuJoCo Menagerie...")
   file(DOWNLOAD "${MENAGERIE_URL}" "${MENAGERIE_ARCHIVE}"
-       SHOW_PROGRESS)
+    SHOW_PROGRESS)
 endif()
 
-if(NOT EXISTS "${MENAGERIE_DIR}/README.md")
+if(NOT EXISTS "${MENAGERIE_DIR}/mujoco_menagerie-main/README.md")
   message(STATUS "Extracting MuJoCo Menagerie...")
   file(MAKE_DIRECTORY "${MENAGERIE_DIR}")
   execute_process(
@@ -61,8 +62,8 @@ if(NOT EXISTS "${MENAGERIE_DIR}/README.md")
 
   execute_process(
     COMMAND ${CMAKE_COMMAND} -E create_symlink
-            "${MENAGERIE_DIR}/mujoco_menagerie-main"
-            "${CMAKE_BINARY_DIR}/menagerie-link"
+    "${MENAGERIE_DIR}/mujoco_menagerie-main"
+    "${CMAKE_BINARY_DIR}/menagerie-link"
     RESULT_VARIABLE SYMLINK_RESULT
   )
   if(NOT SYMLINK_RESULT EQUAL 0)
@@ -72,9 +73,12 @@ if(NOT EXISTS "${MENAGERIE_DIR}/README.md")
 endif()
 
 
-
 include_directories("${MUJOCO_INCLUDE_DIR}")
 link_directories("${MUJOCO_LIB_DIR}")
 
-add_executable(main src/main.cpp)
+add_executable(main
+  src/main.cpp
+  src/renderer.cpp
+)
+
 target_link_libraries(main mujoco glfw pthread m dl)
