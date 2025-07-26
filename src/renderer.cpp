@@ -2,10 +2,11 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE file in the project root for details.
 
 #include "renderer.h"
+#include "simulation.h"
 #include <iostream>
 #include <cstring>
 
-Renderer::Renderer() = default;
+Renderer::Renderer(Simulation& sim_) : sim(sim_) {}
 
 Renderer::~Renderer()
 {
@@ -16,10 +17,6 @@ Renderer::~Renderer()
     mjv_freeScene(&scn);
     mjr_freeContext(&con);
 
-    // free MuJoCo model and data
-    mj_deleteData(d);
-    mj_deleteModel(m);
-
     // terminate GLFW (crashes with Linux NVidia drivers)
 #if defined(__APPLE__) || defined(_WIN32)
     glfwTerminate();
@@ -27,27 +24,12 @@ Renderer::~Renderer()
 }
 
 // load and compile model
-bool Renderer::load(const std::string &path)
+bool Renderer::initialize()
 {
-    char error[1000];
-
-    if (path.size() > 4 && path.substr(path.size() - 4) == ".mjb")
-    {
-        m = mj_loadModel(path.c_str(), nullptr);
-    }
-    else
-    {
-        m = mj_loadXML(path.c_str(), nullptr, error, sizeof(error));
-    }
-
-    if (!m)
-    {
-        std::cerr << "Failed to load model: " << error << std::endl;
+    if (!sim.model() || !sim.data()) {
+        std::cerr << "Simulation must be loaded before initializing renderer\n";
         return false;
     }
-
-    // make data
-    d = mj_makeData(m);
 
     // init GLFW
     if (!glfwInit())
@@ -77,8 +59,8 @@ bool Renderer::load(const std::string &path)
     mjr_defaultContext(&con);
 
     // create scene and context
-    mjv_makeScene(m, &scn, 2000);
-    mjr_makeContext(m, &con, mjFONTSCALE_150);
+    mjv_makeScene(sim.model(), &scn, 2000);
+    mjr_makeContext(sim.model(), &con, mjFONTSCALE_150);
 
     // install GLFW mouse and keyboard callbacks
     glfwSetKeyCallback(window, keyboard);
@@ -93,10 +75,10 @@ void Renderer::run()
 {
     while (!glfwWindowShouldClose(window))
     {
-        mjtNum simstart = d->time;
-        while (d->time - simstart < 1.0 / 60.0)
+        mjtNum simstart = sim.data()->time;
+        while (sim.data()->time - simstart < 1.0 / 60.0)
         {
-            mj_step(m, d);
+            sim.step();
         }
 
         handle_frame();
@@ -110,7 +92,7 @@ void Renderer::handle_frame()
     glfwGetFramebufferSize(window, &viewport.width, &viewport.height);
 
     // update scene and render
-    mjv_updateScene(m, d, &opt, nullptr, &cam, mjCAT_ALL, &scn);
+    mjv_updateScene(sim.model(), sim.data(), &opt, nullptr, &cam, mjCAT_ALL, &scn);
     mjr_render(viewport, &scn, &con);
 
     // swap OpenGL buffers (blocking call due to v-sync)
@@ -127,8 +109,7 @@ void Renderer::keyboard(GLFWwindow *window, int key, int, int act, int)
     if (act == GLFW_PRESS && key == GLFW_KEY_BACKSPACE)
     {
         auto *self = static_cast<Renderer *>(glfwGetWindowUserPointer(window));
-        mj_resetData(self->m, self->d);
-        mj_forward(self->m, self->d);
+        self->sim.reset();
     }
 }
 
@@ -182,7 +163,7 @@ void Renderer::mouse_move(GLFWwindow *window, double xpos, double ypos)
 
     auto *self = static_cast<Renderer *>(glfwGetWindowUserPointer(window));
     // move camera
-    mjv_moveCamera(self->m, action, dx / height, dy / height, &self->scn, &self->cam);
+    mjv_moveCamera(self->sim.model(), action, dx / height, dy / height, &self->scn, &self->cam);
 }
 
 // scroll callback
@@ -190,5 +171,5 @@ void Renderer::scroll(GLFWwindow *window, double, double yoffset)
 {
     auto *self = static_cast<Renderer *>(glfwGetWindowUserPointer(window));
   // emulate vertical mouse motion = 5% of window height
-    mjv_moveCamera(self->m, mjMOUSE_ZOOM, 0, -0.05 * yoffset, &self->scn, &self->cam);
+    mjv_moveCamera(self->sim.model(), mjMOUSE_ZOOM, 0, -0.05 * yoffset, &self->scn, &self->cam);
 }

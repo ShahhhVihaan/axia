@@ -79,6 +79,7 @@ link_directories("${MUJOCO_LIB_DIR}")
 add_executable(main
   src/main.cpp
   src/renderer.cpp
+  src/simulation.cpp
 )
 
 target_link_libraries(main mujoco glfw pthread m dl)

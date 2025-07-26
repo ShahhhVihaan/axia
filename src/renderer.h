@@ -6,14 +6,15 @@
 #include <mujoco/mujoco.h>
 #include <GLFW/glfw3.h>
 #include <string>
+#include "simulation.h"
 
 class Renderer
 {
 public:
-    Renderer();
+    Renderer(Simulation& sim);
     ~Renderer();
 
-    bool load(const std::string &path);
+    bool initialize();
     void run();
 
 private:
@@ -25,9 +26,9 @@ private:
 
     void handle_frame();
 
+    Simulation& sim;
+
     // MuJoCo data structures
-    mjModel *m = NULL; // MuJoCo model
-    mjData *d = NULL;  // MuJoCo data
     mjvCamera cam;     // abstract camera
     mjvOption opt;     // visualization options
     mjvScene scn;      // abstract scene
