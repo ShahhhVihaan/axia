@@ -60,6 +60,7 @@ if(NOT EXISTS "${MENAGERIE_DIR}/mujoco_menagerie-main/README.md")
     message(FATAL_ERROR "Failed to extract MuJoCo Menagerie archive")
   endif()
 
+  message(STATUS "Creating symlink: ${CMAKE_BINARY_DIR}/menagerie-link → ${MENAGERIE_DIR}/mujoco_menagerie-main")
   execute_process(
     COMMAND ${CMAKE_COMMAND} -E create_symlink
     "${MENAGERIE_DIR}/mujoco_menagerie-main"
@@ -67,9 +68,8 @@ if(NOT EXISTS "${MENAGERIE_DIR}/mujoco_menagerie-main/README.md")
     RESULT_VARIABLE SYMLINK_RESULT
   )
   if(NOT SYMLINK_RESULT EQUAL 0)
-    message(WARNING "Failed to create symlink to menagerie")
+    message(WARNING "Failed to create symlink to menagerie. RESULT = ${SYMLINK_RESULT}")
   endif()
-
 endif()
 
 
