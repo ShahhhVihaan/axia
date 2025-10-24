@@ -49,9 +49,12 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
 
         mujoco.mj_forward(model, data) # step
 
+        ## Inertia ellipsoid visualization
+        ## A bit hacky and not correct just for show for now
+        ## TODO: fix properly
+        
         pos = data.xipos[bid]
         R = (data.ximat[bid].reshape(3,3) if hasattr(data, "ximat") else data.xmat[bid].reshape(3,3))
-
         with viewer.lock():
             viewer.user_scn.ngeom = 0
             mujoco.mjv_initGeom(
