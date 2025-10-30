@@ -35,7 +35,7 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
 
     ## turn off visualizing mesh geoms, can turn on by setting group to 1
     ## TODO: add some callback to toggle this during runtime and not hardcode
-    viewer.opt.geomgroup[2] = 0 #  
+    viewer.opt.geomgroup[2] = 1 #  
 
     # Initialize the camera view to that of the free camera
     mujoco.mjv_defaultFreeCamera(model, viewer.cam)
